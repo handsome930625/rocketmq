@@ -157,29 +157,42 @@ public class BrokerController {
             final NettyServerConfig nettyServerConfig,
             final NettyClientConfig nettyClientConfig,
             final MessageStoreConfig messageStoreConfig) {
+
         // 设置配置类
         this.brokerConfig = brokerConfig;
         this.nettyServerConfig = nettyServerConfig;
         this.nettyClientConfig = nettyClientConfig;
         this.messageStoreConfig = messageStoreConfig;
+
         // 估计是消费者偏移量管理器 猜测
         this.consumerOffsetManager = new ConsumerOffsetManager(this);
+        // 构造器预设了几个系统自带的topic
         this.topicConfigManager = new TopicConfigManager(this);
+        // 预计是拉消息处理类
         this.pullMessageProcessor = new PullMessageProcessor(this);
         this.pullRequestHoldService = new PullRequestHoldService(this);
+        // 异步消息到达监听器
         this.messageArrivingListener = new NotifyMessageArrivingListener(this.pullRequestHoldService);
+        // 消费者id改变监听器
         this.consumerIdsChangeListener = new DefaultConsumerIdsChangeListener(this);
+        // 消费者管理类
         this.consumerManager = new ConsumerManager(this.consumerIdsChangeListener);
+        // 消费者过滤管理器
         this.consumerFilterManager = new ConsumerFilterManager(this);
+        // 生产者管理器
         this.producerManager = new ProducerManager();
+        // 处理生产者 和 消费者 不活跃 服务
         this.clientHousekeepingService = new ClientHousekeepingService(this);
         this.broker2Client = new Broker2Client(this);
+        // 订阅组管理类 并在 构造函数中初始化预设订阅组配置
         this.subscriptionGroupManager = new SubscriptionGroupManager(this);
+        // netty服务器启动类
         this.brokerOuterAPI = new BrokerOuterAPI(nettyClientConfig);
+        // 过滤服务器管理类
         this.filterServerManager = new FilterServerManager(this);
 
         this.slaveSynchronize = new SlaveSynchronize(this);
-
+        // 初始化一些必要的Queue
         this.sendThreadPoolQueue = new LinkedBlockingQueue<>(this.brokerConfig.getSendThreadPoolQueueCapacity());
         this.pullThreadPoolQueue = new LinkedBlockingQueue<>(this.brokerConfig.getPullThreadPoolQueueCapacity());
         this.queryThreadPoolQueue = new LinkedBlockingQueue<>(this.brokerConfig.getQueryThreadPoolQueueCapacity());
@@ -189,9 +202,11 @@ public class BrokerController {
         this.endTransactionThreadPoolQueue = new LinkedBlockingQueue<>(this.brokerConfig.getEndTransactionPoolQueueCapacity());
 
         this.brokerStatsManager = new BrokerStatsManager(this.brokerConfig.getBrokerClusterName());
+        // 设置本broker InetSocketAddress
         this.setStoreHost(new InetSocketAddress(this.getBrokerConfig().getBrokerIP1(), this.getNettyServerConfig().getListenPort()));
 
         this.brokerFastFailure = new BrokerFastFailure(this);
+        // 全局配置holder
         this.configuration = new Configuration(
                 log,
                 BrokerPathConfigHelper.getBrokerConfigPath(),

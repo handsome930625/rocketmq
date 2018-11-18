@@ -140,6 +140,11 @@ public class StatsItemSet {
         }
     }
 
+    /**
+     * @param statsKey 统计key
+     * @param incValue 增值
+     * @param incTimes 增加次数
+     */
     public void addValue(final String statsKey, final int incValue, final int incTimes) {
         StatsItem statsItem = this.getAndCreateStatsItem(statsKey);
         statsItem.getValue().addAndGet(incValue);
